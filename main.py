@@ -4,7 +4,7 @@ import os
 # import pyqt5
 
 IGNORE_EXTENSIONS = ['.ini', '.tlog', '.xml', '.hpp', '.ico', '.config', '.resx', '.manifest', '.cache']
-IGNORE_PATHS = ['']
+IGNORE_PATHS = []
 DELETE_FROM_DIR = ""
 IGNORE_HIDDEN = True
 AUTOREMOVE_COPIES = False
