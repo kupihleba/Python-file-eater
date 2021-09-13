@@ -1,22 +1,62 @@
-name: Run SAST
+name: Python SAST
 
 on:
+  # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    tags:
-      - '!refs/tags/*'
-    branches:
-      - '*'
+    branches: [ master, alpha ]
+  pull_request:
+    branches: [ master, alpha ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 jobs:
-  run_tests:
-    runs-on: [ubuntu-latest]
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]
+
     steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
-          architecture: 'x64'
-      - name: Install requirements
-      - run: |
-            python -m pip install --upgrade pip
-            pip install flake8
-            flake8 . --show-source --statistics --count --ignore=E501
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade wheel
+          pip install --upgrade numpy
+          pip install --upgrade scipy
+          pip install --upgrade h5py
+          pip install --upgrade gmsh-dev
+          pip install --upgrade lxml          
+          pip install --upgrade anytree
+          pip install --upgrade isort
+          pip install --upgrade black
+          pip install --upgrade flake8
+          pip install --upgrade flake8-docstrings
+          pip install --upgrade flake8-rst-docstrings
+          pip install --upgrade flake8-bugbear
+          pip install --upgrade pep8-naming
+          pip install --upgrade pytest
+          pip install --upgrade pytest-cov
+      - name: Test with isort
+        run: |
+          isort --check-only mocmg/
+          isort --check-only tests/
+          isort --check-only examples/
+      - name: Test with black
+        run: |
+          black --check mocmg/
+          black --check tests/
+          black --check examples/
+      - name: Test with flake8
+        run: |
+          flake8 mocmg/
+          flake8 tests/
+      - name: Test with pytest
+        run: |
+          pytest
